@@ -1,0 +1,171 @@
+======================
+Persistent Queue Tests
+======================
+
+Basic functionality of the queue::
+
+    >>> from nuxeo.persistentqueue.persistentqueue import PersistentQueue
+    >>> q = PersistentQueue('abc')
+    >>> q
+    PersistentQueue(['a', 'b', 'c'])
+    >>> list(q)
+    ['a', 'b', 'c']
+    >>> str(q)
+    "['a', 'b', 'c']"
+    >>> q.append('d')
+    >>> q.append('e')
+    >>> q
+    PersistentQueue(['a', 'b', 'c', 'd', 'e'])
+    >>> q.pop(0)
+    'a'
+    >>> q.pop(0)
+    'b'
+    >>> q
+    PersistentQueue(['c', 'd', 'e'])
+
+To check for conflicts we'll work in the context of a database with
+conflict resolution, like FileStorage::
+
+    >>> from transaction import TransactionManager as TM
+    >>> from ZODB.FileStorage import FileStorage
+    >>> from ZODB.DB import DB
+    >>> from ZODB.POSException import ConflictError
+    >>> from tempfile import mkstemp
+    >>> fd, filename = mkstemp(prefix='pqDataFs')
+    >>> storage = FileStorage(filename)
+    >>> db = DB(storage)
+
+Create a persistent queue in the storage, and some connections::
+
+    >>> q = PersistentQueue('abc')
+
+    >>> tm1 = TM()
+    >>> conn1 = db.open(transaction_manager=tm1)
+    >>> conn1.root()['q'] = q
+    >>> tm1.commit()
+    >>> dummy = tm1.begin()
+
+    >>> tm2 = TM()
+    >>> conn2 = db.open(transaction_manager=tm2)
+
+    >>> q1 = conn1.root()['q']
+    >>> q1
+    PersistentQueue(['a', 'b', 'c'])
+    >>> q2 = conn2.root()['q']
+    >>> q2
+    PersistentQueue(['a', 'b', 'c'])
+
+A check function::
+
+    >>> def check():
+    ...     tm1.commit()
+    ...     try: tm2.commit()
+    ...     except ConflictError: raise ConflictError # clean doctest output
+    ...     tm1.begin(); tm2.begin()
+    ...     q1 = conn1.root()['q']
+    ...     q2 = conn2.root()['q']
+    ...     if q1 != q2:
+    ...         print 'differ:', q1, q2
+    ...     return q1
+
+Now change the object in each::
+
+    >>> q1.append('d')
+    >>> q2.append('e')
+    >>> q1
+    PersistentQueue(['a', 'b', 'c', 'd'])
+    >>> q2
+    PersistentQueue(['a', 'b', 'c', 'e'])
+    >>> check()
+    PersistentQueue(['a', 'b', 'c', 'd', 'e'])
+
+Now one pop and one append::
+
+    >>> q1.pop(0)
+    'a'
+    >>> q2.append('X')
+    >>> q1
+    PersistentQueue(['b', 'c', 'd', 'e'])
+    >>> q2
+    PersistentQueue(['a', 'b', 'c', 'd', 'e', 'X'])
+    >>> check()
+    PersistentQueue(['b', 'c', 'd', 'e', 'X'])
+
+The other way around::
+
+    >>> q1.pop(0)
+    'b'
+    >>> q2.append('Y')
+    >>> q1
+    PersistentQueue(['c', 'd', 'e', 'X'])
+    >>> q2
+    PersistentQueue(['b', 'c', 'd', 'e', 'X', 'Y'])
+    >>> check()
+    PersistentQueue(['c', 'd', 'e', 'X', 'Y'])
+
+But if you pop on both, it's still a conflict::
+
+    >>> q1.pop(0)
+    'c'
+    >>> q2.pop(0)
+    'c'
+    >>> check()
+    Traceback (most recent call last):
+      ...
+    ConflictError: database conflict error
+    >>> tm2.abort()
+
+
+Several pops and appends per transaction::
+    >>> q1.pop(0)
+    'd'
+    >>> q1.pop(0)
+    'e'
+    >>> q2.append('f'); q2.append('g')
+    >>> check()
+    PersistentQueue(['X', 'Y', 'f', 'g'])
+
+
+We can pop and append in same transaction::
+    >>> q1.pop(0)
+    'X'
+    >>> q1.pop(0)
+    'Y'
+    >>> q1.append('h'); q1.append('i')
+    >>> check()
+    PersistentQueue(['f', 'g', 'h', 'i'])
+
+
+Basic check that order is preserved::
+    >>> q2.append('k'); q2.append('l')
+    >>> q1.append('j')
+    >>> check()
+    PersistentQueue(['f', 'g', 'h', 'i', 'j', 'k', 'l'])
+
+    >>> q2.pop(0)
+    'f'
+    >>> q2.pop(0)
+    'g'
+    >>> q2.pop(0)
+    'h'
+    >>> q2.pop(0)
+    'i'
+    >>> q1.append(7)
+    >>> q2.append(0)
+    >>> q1.append(8)
+    >>> check()
+    PersistentQueue(['j', 'k', 'l', 7, 8, 0])
+
+
+Cleanup::
+
+    >>> tm1.abort(); tm2.abort()
+    >>> conn1.close(); conn2.close()
+    >>> db.close()
+    >>> import os
+    >>> os.unlink(filename)
+
+
+.. Local Variables:
+.. mode: doctest
+.. End

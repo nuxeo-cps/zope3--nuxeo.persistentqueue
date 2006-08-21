@@ -1,0 +1,50 @@
+*******************************************
+** persistentqueue V0.1.0 [R1 build 2006/05/30-22:06 by ogrisel]
+** SVN URL: https://svn.nuxeo.org/priv/nuxeo.persistenqueue/trunk Revision: 34887
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- ZODB 3.2.x compatibility
+- Allows the nuxeo.persistentqueue package to be installed as a Zope
+product
+
+*******************************************
+** persistentqueue V0.0.2 [R1 build 2006/01/10-16:00 by alienoid]
+** SVN URL: https://rspivak@svn.nuxeo.org/priv/nuxeo.persistenqueue/trunk Revision: 28887
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- Fixed to allow only one thread to pop.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
+*******************************************
+** persistentqueue V0.0.1 [R1 build 2006/01/10-03:54 by alienoid]
+** SVN URL: https://rspivak@svn.nuxeo.org/priv/nuxeo.persistenqueue/trunk Revision: 28849
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
