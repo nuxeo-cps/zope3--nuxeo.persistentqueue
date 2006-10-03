@@ -29,9 +29,16 @@ import sys
 # Zope product.  It will add the src directory to the PYTHONPATH.
 # Note that this strictly optional, just makes deployment with Zope
 # more easy.
+    
 product_dir, filename = os.path.split(__file__)
 src_path = os.path.join(product_dir, 'src')
-sys.path.insert(0, src_path)
+if 'nuxeo' in sys.modules:
+    nx_path = os.path.join(src_path, 'nuxeo')
+    sys.path.insert(0, nx_path)
+    import persistentqueue
+    sys.modules['nuxeo.persistentqueue'] = persistentqueue
+else:
+    sys.path.insert(0, src_path)
 
 LOG("nuxeo.persistentqueue", DEBUG, src_path)
 

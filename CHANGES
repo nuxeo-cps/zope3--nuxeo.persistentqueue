@@ -3,7 +3,8 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
--
+- Made nuxPersistentQueue live happily with nuxLucene in the same
+  Zope instance.
 Bug fixes:
 ~~~~~~~~~~
 -
