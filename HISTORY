@@ -1,3 +1,24 @@
+===========================================================
+Package: persistentqueue 0.2.0
+===========================================================
+First release built by: lregebro at: 2006-10-03T19:18:03
+SVN Tag: https://svn.nuxeo.org/pub/Zope3/nuxeo.persistentqueue/tags/0.2.0
+Build from: https://svn.nuxeo.org/pub/Zope3/nuxeo.persistentqueue/trunk@49284
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+- Made nuxPersistentQueue live happily with nuxLucene in the same
+  Zope instance.
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
 *******************************************
 ** persistentqueue V0.1.0 [R1 build 2006/05/30-22:06 by ogrisel]
 ** SVN URL: https://svn.nuxeo.org/priv/nuxeo.persistenqueue/trunk Revision: 34887
